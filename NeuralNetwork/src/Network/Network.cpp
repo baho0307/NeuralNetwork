@@ -1,5 +1,17 @@
 #include "Network.h"
 
+Network::Network()
+{
+
+}
+
+Network::Network(std::vector<MatrixXd> weights, std::vector<VectorXd> biases, VectorXd out)
+{
+    this->weights = weights;
+    this->biases = biases;
+    this->out = out;
+}
+
 Network::Network(std::vector<int> layers)
 {
     for (int i = 1; i < layers.size(); i++)
@@ -15,12 +27,31 @@ Network::Network(std::vector<int> layers)
     }
 }
 
+Network Network::operator=(const Network& net)
+{
+   	weights = net.weights;
+	biases = net.biases;
+    out = net.out;
+
+    return Network(weights, biases, out);
+}
+
+static std::string toString(const Eigen::MatrixXd& mat) {
+    std::stringstream ss;
+    ss << mat;
+    return ss.str();
+}
+
+static Eigen::VectorXd sigmoid(const Eigen::VectorXd& input) {
+    return 1.0 / (1.0 + (-input.array()).exp());
+}
+
 void Network::calc(VectorXd in)
 {
     VectorXd r = in;
     for (int i = 0; i < weights.size(); i++)
     {
-        r = (weights[i] * r);
+        r = sigmoid((weights[i] * r) + biases[i]);
     }
     out = r;
 }
@@ -30,3 +61,23 @@ VectorXd Network::getOut()
     std::cout << out << std::endl;
     return out;
 }
+
+#if DEBUG
+
+Network::Network(std::vector<int> layers, std::string* scr) : Network(layers)
+{
+    _scr = scr;
+}
+
+void Network::debug(int x)
+{
+    if (!_scr)
+        std::cout << "PLEASE CREATE THE OBJECT WITH DEBUG CONSTRUCTOR" << std::endl;
+    else
+    {
+        _scr->clear();
+        *_scr += toString(weights[x % weights.size()]); //+ ((i + x) % weights.size() < weights.size() - 1 ? " : hl" + (i + x) % weights.size() : " : ol") + " | ";
+    }
+}
+
+#endif

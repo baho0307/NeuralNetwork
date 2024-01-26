@@ -151,6 +151,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Snake\Snake.cpp" />
+    <ClCompile Include="src\Screen\Screen.cpp" />
     <ClCompile Include="src\Random\Random.cpp" />
     <ClCompile Include="src\Network\Network.cpp" />
     <ClCompile Include="NeuralNetwork.cpp" />
@@ -464,6 +466,8 @@
     <ClInclude Include="Eigen\src\SVD\SVDBase.h" />
     <ClInclude Include="Eigen\src\SVD\UpperBidiagonalization.h" />
     <ClInclude Include="Eigen\src\UmfPackSupport\UmfPackSupport.h" />
+    <ClInclude Include="src\Snake\Snake.h" />
+    <ClInclude Include="src\Screen\Screen.h" />
     <ClInclude Include="src\Random\Random.h" />
     <ClInclude Include="src\Network\Network.h" />
     <ClInclude Include="src\Neuron\Neuron.h" />
