@@ -6,7 +6,7 @@
 class Snake
 {
 private:
-	bool dead = true;
+	bool dead = false;
 	int life;
 	int lifeTime = 0;
 	int score = 0;
@@ -40,6 +40,6 @@ public:
 	Snake(std::vector<int> brain, int life, int  x, int y);
 
 	void Move();
-	void Draw();
+	void Draw(std::string *str);
 };
 

@@ -66,7 +66,12 @@ void NetworkDebug()
 
 int main()
 {
+    Screen scr(120, 30);
     Snake snake({24, 16, 16, 4}, 200, 120, 30);
-
-    snake.Move();
+    while (true)
+    {
+        snake.Move();
+        snake.Draw(scr.generate());
+        scr.Show();
+    }
 }

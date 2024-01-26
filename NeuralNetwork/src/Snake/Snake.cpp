@@ -9,6 +9,7 @@ Snake::Snake(std::vector<int> brain, int life, int x, int y)
 	size(1) = y;
 	food(0) = rnd.getRand(1, x - 1);
 	food(1) = rnd.getRand(1, y - 1);
+    hLoc = size / 2;
 }
 
 void Snake::Move()
@@ -19,11 +20,22 @@ void Snake::Move()
         Think();
         lifeTime++;
         life--;
-        if (foodCollide(hLoc))
+        //if (foodCollide(hLoc))
             //eat(); eat function
         shiftBody();
         dead = life <= 0 || bodyCollide(hLoc) || wallCollide(hLoc);
     }
+}
+
+void Snake::Draw(std::string* str)
+{
+    std::string scr(120 * 30, ' ');
+    scr[hLoc(0) + hLoc(1) * size(0)] = 'H';
+    for (int i = 0; i < body.size(); i++)
+    {
+        scr[body[i](0) + body[i](1) * size(0)] = 'B';
+    }
+    *str = scr;
 }
 
 void Snake::shiftBody()
@@ -56,7 +68,7 @@ bool Snake::foodCollide(Eigen::Vector2i pos)
 
 bool Snake::wallCollide(Eigen::Vector2i pos)
 {
-    return (pos(0) >= size(1) - 1) || (pos(0) < 1) || (pos(1) >= size(0) - 1) || (pos(1) < 1);
+    return (pos(0) >= size(0) - 1) || (pos(0) < 1) || (pos(1) >= size(1) - 1) || (pos(1) < 1);
 }
 
 Eigen::Vector3d Snake::lookInDirection(Eigen::Vector2i dir)
@@ -66,7 +78,7 @@ Eigen::Vector3d Snake::lookInDirection(Eigen::Vector2i dir)
     float distance = 0;
     bool foodFound = false;
     bool bodyFound = false;
-    pos + dir;
+    pos = pos + dir;
     distance++;
     while (!wallCollide(pos))
     {
@@ -80,7 +92,7 @@ Eigen::Vector3d Snake::lookInDirection(Eigen::Vector2i dir)
             bodyFound = true;
             look(1) = 1;
         }
-        pos + dir;
+        pos = pos + dir;
         distance++;
     }
     look[2] = 1 / distance;

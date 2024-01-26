@@ -58,7 +58,7 @@ void Network::calc(VectorXd in)
 
 VectorXd Network::getOut()
 {
-    std::cout << out << std::endl;
+    //std::cout << out << std::endl;
     return out;
 }
 
