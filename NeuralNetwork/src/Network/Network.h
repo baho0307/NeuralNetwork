@@ -1,6 +1,6 @@
 #pragma once 
 
-#define DEBUG true; //if you are using this library for your project please be sure to set the variable to false
+#define DEBUG true //if you are using this library for your project please be sure to set the variable to false
 
 #if DEBUG
 	#include "../Screen/Screen.h"
@@ -21,6 +21,8 @@ public:
 	Network(std::vector<MatrixXd> weights, std::vector<VectorXd> biases, VectorXd out);
 	Network(std::vector<int> layers);
 	Network operator=(const Network& net);
+
+	Network crossover(const Network& net);
 	void calc(VectorXd in);
 	VectorXd getOut();
 

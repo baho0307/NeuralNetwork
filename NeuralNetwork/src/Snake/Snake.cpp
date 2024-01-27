@@ -1,5 +1,5 @@
 #include "Snake.h"
-
+#include "iostream"
 Snake::Snake(std::vector<int> brain, int life, int x, int y)
 {
 	this->life = life;
@@ -73,7 +73,7 @@ bool Snake::wallCollide(Eigen::Vector2i pos)
 
 Eigen::Vector3d Snake::lookInDirection(Eigen::Vector2i dir)
 {
-    Eigen::Vector3d look;
+    Eigen::Vector3d look = Eigen::Vector3d::Zero();
     Eigen::Vector2i pos = hLoc;
     float distance = 0;
     bool foodFound = false;
@@ -102,37 +102,28 @@ Eigen::Vector3d Snake::lookInDirection(Eigen::Vector2i dir)
 void Snake::Look()
 {
     Eigen::VectorXd temp = lookInDirection(Eigen::Vector2i(-1/*SIZE*/, 0));
-    input[0] = temp[0];
-    input[1] = temp[1];
-    input[2] = temp[2];
+    input.segment(0, 3) = temp;
+
     temp = lookInDirection(Eigen::Vector2i(-1/*SIZE*/, -1/*SIZE*/));
-    input[3] = temp[0];
-    input[4] = temp[1];
-    input[5] = temp[2];
+    input.segment(3, 3) = temp;
+
     temp = lookInDirection(Eigen::Vector2i(0, -1/*SIZE*/));
-    input[6] = temp[0];
-    input[7] = temp[1];
-    input[8] = temp[2];
+    input.segment(6, 3) = temp;
+
     temp = lookInDirection(Eigen::Vector2i(1/*SIZE*/, -1/*SIZE*/));
-    input[9] = temp[0];
-    input[10] = temp[1];
-    input[11] = temp[2];
+    input.segment(9, 3) = temp;
+
     temp = lookInDirection(Eigen::Vector2i(1/*SIZE*/, 0));
-    input[12] = temp[0];
-    input[13] = temp[1];
-    input[14] = temp[2];
+    input.segment(12, 3) = temp;
+
     temp = lookInDirection(Eigen::Vector2i(1/*SIZE*/, 1/*SIZE*/));
-    input[15] = temp[0];
-    input[16] = temp[1];
-    input[17] = temp[2];
+    input.segment(15, 3) = temp;
+
     temp = lookInDirection(Eigen::Vector2i(0, 1/*SIZE*/));
-    input[18] = temp[0];
-    input[19] = temp[1];
-    input[20] = temp[2];
+    input.segment(18, 3) = temp;
+
     temp = lookInDirection(Eigen::Vector2i(-1/*SIZE*/, 1/*SIZE*/));
-    input[21] = temp[0];
-    input[22] = temp[1];
-    input[23] = temp[2];
+    input.segment(21, 3) = temp;
 }
 
 void Snake::Think()

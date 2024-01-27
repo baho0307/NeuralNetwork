@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Population\Population.cpp" />
     <ClCompile Include="src\Snake\Snake.cpp" />
     <ClCompile Include="src\Screen\Screen.cpp" />
     <ClCompile Include="src\Random\Random.cpp" />
@@ -466,6 +467,7 @@
     <ClInclude Include="Eigen\src\SVD\SVDBase.h" />
     <ClInclude Include="Eigen\src\SVD\UpperBidiagonalization.h" />
     <ClInclude Include="Eigen\src\UmfPackSupport\UmfPackSupport.h" />
+    <ClInclude Include="src\Population\Population.h" />
     <ClInclude Include="src\Snake\Snake.h" />
     <ClInclude Include="src\Screen\Screen.h" />
     <ClInclude Include="src\Random\Random.h" />
