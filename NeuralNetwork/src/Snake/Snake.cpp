@@ -1,5 +1,18 @@
 #include "Snake.h"
 #include "iostream"
+
+Snake::Snake(Network brain, int life, int x, int y)
+{
+    this->life = life;
+    net = brain;
+    input = VectorXd(24);
+    size(0) = x;
+    size(1) = y;
+    food(0) = rnd.getRand(1, x - 1);
+    food(1) = rnd.getRand(1, y - 1);
+    hLoc = size / 2;
+}
+
 Snake::Snake(std::vector<int> brain, int life, int x, int y)
 {
 	this->life = life;
@@ -10,6 +23,11 @@ Snake::Snake(std::vector<int> brain, int life, int x, int y)
 	food(0) = rnd.getRand(1, x - 1);
 	food(1) = rnd.getRand(1, y - 1);
     hLoc = size / 2;
+}
+
+bool Snake::getDead()
+{
+    return dead;
 }
 
 void Snake::Move()
@@ -38,10 +56,16 @@ void Snake::Draw(std::string* str)
     *str = scr;
 }
 
+Snake Snake::crossover(Snake& other)
+{
+    Snake newS(net.crossover(other.net), life + lifeTime, size(0), size(1));
+    return newS;
+}
+
 void Snake::shiftBody()
 {
     Eigen::Vector2i temp = hLoc;
-    hLoc += vel;
+    hLoc += relative(Eigen::Vector2i(0, 1), dir);
     Eigen::Vector2i temp2;
     for (int i = 0; i < body.size(); i++)
     {
@@ -73,6 +97,7 @@ bool Snake::wallCollide(Eigen::Vector2i pos)
 
 Eigen::Vector3d Snake::lookInDirection(Eigen::Vector2i dir)
 {
+    dir = relative(dir, this->dir);
     Eigen::Vector3d look = Eigen::Vector3d::Zero();
     Eigen::Vector2i pos = hLoc;
     float distance = 0;
@@ -138,37 +163,56 @@ void Snake::Think()
         moveUp();
         break;
     case 1:
-        moveDown();
+        moveRight();
         break;
     case 2:
         moveLeft();
         break;
     case 3:
-        moveRight();
+        switch ((int)rnd.getRand(0, 2.99))
+        {
+        case 0:
+            moveUp();
+            break;
+        case 1:
+            moveRight();
+            break;
+        case 2:
+            moveLeft();
+            break;
+        }
         break;
     }
 }
 
 void Snake::moveUp()
 {
-    if (vel(0) != 1/*SIZE*/)
-        vel(0) = 0; vel(1) = -1/*SIZE*/;
-}
-
-void Snake::moveDown()
-{
-    if (vel(0) != -1/*SIZE*/)
-        vel(0) = 0; vel(1) = 1/*SIZE*/;
+    //there is nothing to do :D
 }
 
 void Snake::moveLeft()
 {
-    if (vel(0) != 1/*SIZE*/)
-        vel(0) = -1/*SIZE*/; vel(1) = 0;
+    if (!(dir % 2))
+        dir = DIR(dir / -2);
+    else
+        dir = DIR(dir * 2);
 }
 
 void Snake::moveRight()
 {
-    if (vel(0) != -1/*SIZE*/)
-        vel(0) = 1/*SIZE*/; vel(1) = 0;
+    if (!(dir % 2))
+        dir = DIR(dir / 2);
+    else
+        dir = DIR(dir * -2);
+}
+
+Eigen::Vector2i Snake::relative(Eigen::Vector2i vec, DIR dir)
+{
+    Eigen::Vector2i rltVector = vec;
+    
+    if (!(dir % 2))
+        rltVector *= dir / 2;
+    else
+        rltVector = rltVector.transpose() * -1;
+    return rltVector;
 }

@@ -2,6 +2,13 @@
 
 #include "../Network/Network.h"
 
+enum DIR
+{
+	LEFT = -1,
+	RIGHT = 1,
+	UP = 2,
+	DOWN = -2
+};
 
 class Snake
 {
@@ -21,7 +28,7 @@ private:
 
 	VectorXd input;
 
-	Eigen::Vector2i		vel;
+	DIR					dir = UP;
 
 	bool bodyCollide(Eigen::Vector2i pos);
 	bool wallCollide(Eigen::Vector2i pos);
@@ -35,11 +42,16 @@ private:
 	void moveLeft();
 	void moveRight();
 
+	Eigen::Vector2i relative(Eigen::Vector2i vec, DIR dir);
 public:
 	Snake();
+	Snake(Network brain, int life, int x, int y);
 	Snake(std::vector<int> brain, int life, int  x, int y);
+
+	bool getDead();
 
 	void Move();
 	void Draw(std::string *str);
+	Snake crossover(Snake& other);
 };
 
