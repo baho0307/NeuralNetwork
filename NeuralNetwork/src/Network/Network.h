@@ -22,7 +22,7 @@ public:
 	Network(std::vector<int> layers);
 	Network operator=(const Network& net);
 
-	Network crossover(const Network& net);
+	Network crossover(const Network& net, double mutationRate, double mutationStrength);
 	void calc(VectorXd in);
 	VectorXd getOut();
 

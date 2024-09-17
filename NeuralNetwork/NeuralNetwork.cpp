@@ -2,6 +2,7 @@
 #include "src/Neuron/Neuron.h"
 #include "src/Network/Network.h"
 #include "src/Snake/Snake.h"
+#include "src/Population/Population.h"
 
 using namespace Eigen;
 
@@ -64,14 +65,26 @@ void NetworkDebug()
     }
 }
 
+//void SnakeTest() 
+//{
+//    Screen scr(120, 30);
+//    Snake snake({ 24, 16, 16, 4 }, 200, 120, 30);
+//    while (true)
+//    {
+//        snake.Move();
+//        snake.Draw(scr.generate());
+//        scr.Show();
+//    }
+//}
+
 int main()
 {
     Screen scr(120, 30);
-    Snake snake({24, 16, 16, 4}, 200, 120, 30);
+    Population pop(500, 200, { 24, 32, 16, 3 }, scr.generate());
+
     while (true)
     {
-        snake.Move();
-        snake.Draw(scr.generate());
-        scr.Show();
+        pop.Run();
+        scr.Show(); // do the score and food thing
     }
 }

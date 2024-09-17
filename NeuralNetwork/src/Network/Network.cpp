@@ -46,19 +46,93 @@ static Eigen::VectorXd sigmoid(const Eigen::VectorXd& input) {
     return 1.0 / (1.0 + (-input.array()).exp());
 }
 
-Network Network::crossover(const Network& net)
+//Network Network::crossover(const Network& net) //MY CROSSOVER
+//{
+//    std::vector<MatrixXd> newW;
+//    std::vector<VectorXd> newB;
+//    for (int i = 0; i < weights.size(); i++)
+//    {
+//        Eigen::MatrixXd identity = Eigen::MatrixXd::Identity(weights[i].cols(), weights[i].cols());
+//        identity.bottomRightCorner(identity.rows(), identity.cols() / 2) = MatrixXd::Zero(identity.rows(), identity.cols() / 2);
+//        newW.push_back(weights[i] * identity);
+//        if (identity.rows() % 2)
+//            identity(identity.rows() / 2, identity.rows() / 2) = 0;
+//        //std::cout << newW[i].rows() << " " << newW[i].cols() << std::endl << weights[i].rows() << " " << weights[i].cols();
+//        newW[i] = newW[i] + net.weights[i] * identity.reverse();
+//        newB.push_back((biases[i] + net.biases[i]) / 2);
+//    }
+//    return Network(newW, newB, out);
+//}
+
+#include <random>
+
+Network Network::crossover(const Network& net, double mutationRate, double mutationStrength)
 {
     std::vector<MatrixXd> newW;
     std::vector<VectorXd> newB;
+
+    // Random number generator setup
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(0.0, 1.0);  // For random selection (crossover and mutation)
+    std::normal_distribution<> mutationNoise(0.0, mutationStrength);  // For mutation noise (Gaussian)
+
     for (int i = 0; i < weights.size(); i++)
     {
-        Eigen::MatrixXd identity = Eigen::MatrixXd::Identity(weights[i].cols(), weights[i].cols());
-        identity.bottomRightCorner(identity.rows() / 2, identity.cols() / 2) = MatrixXd::Zero(identity.rows() / 2, identity.cols() / 2);
-        newW.push_back(identity * weights[i] + identity.transpose() * net.weights[i]);
-        newB.push_back((biases[i] + net.biases[i]) / 2);
+        MatrixXd childW = MatrixXd::Zero(weights[i].rows(), weights[i].cols());
+        VectorXd childB = VectorXd::Zero(biases[i].size());
+
+        // Randomly select weights from either this network or the other network (net), and mutate some weights
+        for (int r = 0; r < weights[i].rows(); r++)
+        {
+            for (int c = 0; c < weights[i].cols(); c++)
+            {
+                // Perform crossover
+                if (dis(gen) < 0.5)
+                {
+                    childW(r, c) = weights[i](r, c);  // Take weight from this network
+                }
+                else
+                {
+                    childW(r, c) = net.weights[i](r, c);  // Take weight from net
+                }
+
+                // Apply mutation with the specified mutation rate
+                if (dis(gen) < mutationRate)
+                {
+                    childW(r, c) += mutationNoise(gen);  // Add small random noise to mutate the weight
+                }
+            }
+        }
+
+        // Randomly select biases from either this network or the other network, and mutate some biases
+        for (int j = 0; j < biases[i].size(); j++)
+        {
+            // Perform crossover
+            if (dis(gen) < 0.5)
+            {
+                childB(j) = biases[i](j);  // Take bias from this network
+            }
+            else
+            {
+                childB(j) = net.biases[i](j);  // Take bias from net
+            }
+
+            // Apply mutation with the specified mutation rate
+            if (dis(gen) < mutationRate)
+            {
+                childB(j) += mutationNoise(gen);  // Add small random noise to mutate the bias
+            }
+        }
+
+        newW.push_back(childW);
+        newB.push_back(childB);
     }
+
     return Network(newW, newB, out);
 }
+
+
 
 void Network::calc(VectorXd in)
 {
@@ -72,7 +146,6 @@ void Network::calc(VectorXd in)
 
 VectorXd Network::getOut()
 {
-    //std::cout << out << std::endl;
     return out;
 }
 

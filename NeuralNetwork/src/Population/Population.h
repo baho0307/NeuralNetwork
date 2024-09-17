@@ -9,7 +9,10 @@ private:
 	std::string*		addr;
 
 	void newGeneration();
+	void calcGen();
 	bool dead = false;
+
+	Food foods;
 
 public:
 	Population(int count, int lifeTime, std::vector<int> layers, std::string *str);

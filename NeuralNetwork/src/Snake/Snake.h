@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../Network/Network.h"
+#include <math.h>
+#include "../Food/Food.h"
 
 enum DIR
 {
@@ -13,11 +15,14 @@ enum DIR
 class Snake
 {
 private:
-	bool dead = false;
+	bool dead;
 	int life;
-	int lifeTime = 0;
-	int score = 0;
-	Eigen::Vector2i food;
+	int lifeTime;
+	int lastTime;
+	int score;
+	double fitness;
+	int f_i;
+	std::vector<Eigen::Vector2i> *food;
 	Eigen::Vector2i size;
 	Eigen::Vector2i hLoc;
 	std::vector<Eigen::Vector2i> body;
@@ -28,7 +33,7 @@ private:
 
 	VectorXd input;
 
-	DIR					dir = UP;
+	DIR					dir;
 
 	bool bodyCollide(Eigen::Vector2i pos);
 	bool wallCollide(Eigen::Vector2i pos);
@@ -38,17 +43,22 @@ private:
 	void Think();
 	void shiftBody();
 	void moveUp();
-	void moveDown();
 	void moveLeft();
 	void moveRight();
+
+	void createFood();
+	void createBody();
+	void eat();
 
 	Eigen::Vector2i relative(Eigen::Vector2i vec, DIR dir);
 public:
 	Snake();
-	Snake(Network brain, int life, int x, int y);
-	Snake(std::vector<int> brain, int life, int  x, int y);
+	Snake(const Snake& other);
+	Snake(Network brain, std::vector<Eigen::Vector2i>* f, int life, int x, int y);
+	Snake(std::vector<int> brain, std::vector<Eigen::Vector2i>* f, int life, int  x, int y);
 
 	bool getDead();
+	double getFitness();
 
 	void Move();
 	void Draw(std::string *str);
