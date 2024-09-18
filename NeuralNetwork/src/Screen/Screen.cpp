@@ -46,3 +46,13 @@ void Screen::Show()
 	}
 	setCursorPosition(0, 0);
 }
+
+int Screen::get_x()
+{
+	return x;
+}
+
+int Screen::get_y()
+{
+	return y;
+}

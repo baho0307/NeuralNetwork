@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Snake/Snake.h"
+#include "../Screen/Screen.h"
 
 class Population
 {
@@ -14,8 +15,11 @@ private:
 
 	Food foods;
 
+	int x;
+	int y;
+
 public:
-	Population(int count, int lifeTime, std::vector<int> layers, std::string *str);
+	Population(int count, int lifeTime, std::vector<int> layers, Screen *str);
 
 	void Run();
 };

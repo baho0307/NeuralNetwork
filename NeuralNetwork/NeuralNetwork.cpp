@@ -79,8 +79,8 @@ void NetworkDebug()
 
 int main()
 {
-    Screen scr(120, 30);
-    Population pop(500, 200, { 24, 32, 16, 3 }, scr.generate());
+    Screen scr(30, 30);
+    Population pop(500, 200, { 24, 16, 16, 3 }, &scr);
 
     while (true)
     {

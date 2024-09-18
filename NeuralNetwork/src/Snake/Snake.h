@@ -22,7 +22,7 @@ private:
 	int score;
 	double fitness;
 	int f_i;
-	std::vector<Eigen::Vector2i> *food;
+	Food *food;
 	Eigen::Vector2i size;
 	Eigen::Vector2i hLoc;
 	std::vector<Eigen::Vector2i> body;
@@ -46,7 +46,6 @@ private:
 	void moveLeft();
 	void moveRight();
 
-	void createFood();
 	void createBody();
 	void eat();
 
@@ -54,8 +53,8 @@ private:
 public:
 	Snake();
 	Snake(const Snake& other);
-	Snake(Network brain, std::vector<Eigen::Vector2i>* f, int life, int x, int y);
-	Snake(std::vector<int> brain, std::vector<Eigen::Vector2i>* f, int life, int  x, int y);
+	Snake(Network brain, Food* f, int life, int x, int y);
+	Snake(std::vector<int> brain, Food* f, int life, int  x, int y);
 
 	bool getDead();
 	double getFitness();

@@ -13,11 +13,10 @@ Snake::Snake(const Snake& other)
     f_i = 0;
     net = other.net;
     input = VectorXd(24);
-    size(0) = 120; //scr size must be variable
-    size(1) = 30;
+    size = other.size;
     hLoc = size / 2;
     dir = UP;
-    createBody(); createBody(); createBody();
+    createBody(); createBody(); createBody(); createBody();
 }
 
 void Snake::eat()
@@ -26,13 +25,8 @@ void Snake::eat()
     f_i++;
     life += 100;
     createBody();
-    if (f_i <= food->size())
-        createFood();
-}
-
-void Snake::createFood()
-{
-    food->push_back(Eigen::Vector2i((int)rnd.getRand(30, 90), (int)rnd.getRand(10, 20)));
+    if (f_i >= food->foods.size())
+        food->create();
 }
 
 void Snake::createBody()
@@ -57,7 +51,7 @@ Snake::Snake()
 {
 }
 
-Snake::Snake(Network brain, std::vector<Eigen::Vector2i>* f, int life, int x, int y)
+Snake::Snake(Network brain, Food* f, int life, int x, int y)
 {
     this->life = life;
     fitness = 0;
@@ -73,10 +67,10 @@ Snake::Snake(Network brain, std::vector<Eigen::Vector2i>* f, int life, int x, in
     size(1) = y;
     hLoc = size / 2;
     dir = UP;
-    createBody(); createBody(); createBody();
+    createBody(); createBody(); createBody(); createBody();
 }
 
-Snake::Snake(std::vector<int> brain, std::vector<Eigen::Vector2i>* f, int life, int x, int y)
+Snake::Snake(std::vector<int> brain, Food* f, int life, int x, int y)
 {
 	this->life = life;
     fitness = 0;
@@ -92,7 +86,7 @@ Snake::Snake(std::vector<int> brain, std::vector<Eigen::Vector2i>* f, int life, 
 	size(1) = y;
     hLoc = size / 2;
     dir = UP;
-    createBody(); createBody(); createBody();
+    createBody(); createBody(); createBody(); createBody();
 }
 
 bool Snake::getDead()
@@ -102,7 +96,14 @@ bool Snake::getDead()
 
 double Snake::getFitness()
 {
-    fitness = log((1 + lifeTime + abs(hLoc.x() - 60) + abs(hLoc.y() - 60))/2 + std::pow(3, score*3));
+    if (score < 10) {
+        fitness = floor(lifeTime * lifeTime) * pow(2, score);
+    }
+    else {
+        fitness = floor(lifeTime * lifeTime);
+        fitness *= pow(2, 10);
+        fitness *= (score - 9);
+    }
     return fitness;
 }
 
@@ -123,8 +124,8 @@ void Snake::Move()
 
 void Snake::Draw(std::string* str)
 {
-    std::string scr(120 * 30, ' ');
-    scr[(*food)[f_i](0) + (*food)[f_i](1) * size(0)] = 'F';
+    std::string scr(size(0) * size(1), ' ');
+    scr[(food->foods)[f_i](0) + (food->foods)[f_i](1) * size(0)] = 'F';
     scr[hLoc(0) + hLoc(1) * size(0)] = 'H';
     for (int i = 0; i < body.size(); i++)
     {
@@ -135,7 +136,7 @@ void Snake::Draw(std::string* str)
 
 Snake Snake::crossover(Snake& other)
 {
-    Snake newS(net.crossover(other.net, 0.05,0.1), food, 50, size(0), size(1));
+    Snake newS(net.crossover(other.net, 0.2,1.0), food, 100, size(0), size(1));
     return newS;
 }
 
@@ -164,7 +165,7 @@ bool Snake::bodyCollide(Eigen::Vector2i pos)
 
 bool Snake::foodCollide(Eigen::Vector2i pos)
 {
-    return pos == (*food)[f_i];
+    return pos == (food->foods)[f_i];
 }
 
 bool Snake::wallCollide(Eigen::Vector2i pos)
@@ -186,18 +187,18 @@ Eigen::Vector3d Snake::lookInDirection(Eigen::Vector2i _dir)
     {
         if (!foodFound && foodCollide(pos))
         {
-            foodFound = distance; //input size can be decreased to 12
-            look(0) = distance;
+            foodFound = true; //input size can be decreased to 12
+            look(0) = 1;
         }
         if (!bodyFound && bodyCollide(pos))
         {
-            bodyFound = distance;
-            look(1) = distance;
+            bodyFound = true;
+            look(1) = 1 / distance;
         }
         pos = pos + dir;
         distance++;
     }
-    look[2] = distance;
+    look[2] = 1 / distance;
     return look;
 }
 

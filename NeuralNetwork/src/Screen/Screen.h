@@ -11,6 +11,8 @@ public:
 	Screen(int hX, int hY);
 	std::string*	generate();
 	void	Show();
+	int get_x();
+	int get_y();
 
 private:
 	int				x;

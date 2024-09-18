@@ -1,17 +1,19 @@
 #include "Population.h"
 
 
-Population::Population(int count, int lifeTime, std::vector<int> layers, std::string* str) //create snake population
+Population::Population(int count, int lifeTime, std::vector<int> layers, Screen *scr) //create snake population
 {
 	std::vector<Snake> newSnakes;
-	foods = Food();
+	x = scr->get_x();
+	y = scr->get_y();
+	foods = Food(x, y);
 
 	for (int i = 0; i < count; i++)
 	{
-		newSnakes.push_back(Snake(layers, &foods.foods, lifeTime, 120, 30)); //scr size must be variable
+		newSnakes.push_back(Snake(layers, &foods, lifeTime, x, y)); //scr size must be variable
 	}
 	pop = newSnakes;
-	addr = str;
+	addr = scr->generate();
 }
 
 void Population::calcGen() //calculate the best snake and replace it to the first indice
@@ -44,7 +46,7 @@ void Population::newGeneration()
 		newSnakes.push_back(pop[0].crossover(pop[i])); // crossing over all of the snakes with the best gen(best snake)
 	}
 	pop = newSnakes;
-	foods = Food();
+	foods.generate();
 }
 
 void Population::Run()
