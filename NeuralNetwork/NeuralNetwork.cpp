@@ -65,22 +65,10 @@ void NetworkDebug()
     }
 }
 
-//void SnakeTest() 
-//{
-//    Screen scr(120, 30);
-//    Snake snake({ 24, 16, 16, 4 }, 200, 120, 30);
-//    while (true)
-//    {
-//        snake.Move();
-//        snake.Draw(scr.generate());
-//        scr.Show();
-//    }
-//}
-
 int main()
 {
     Screen scr(30, 30);
-    Population pop(500, 200, { 24, 16, 16, 3 }, &scr);
+    Population pop(500, 200, { 24, 32, 32, 3 }, &scr);
 
     while (true)
     {

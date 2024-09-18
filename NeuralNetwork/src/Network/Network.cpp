@@ -46,24 +46,6 @@ static Eigen::VectorXd sigmoid(const Eigen::VectorXd& input) {
     return 1.0 / (1.0 + (-input.array()).exp());
 }
 
-//Network Network::crossover(const Network& net) //MY CROSSOVER
-//{
-//    std::vector<MatrixXd> newW;
-//    std::vector<VectorXd> newB;
-//    for (int i = 0; i < weights.size(); i++)
-//    {
-//        Eigen::MatrixXd identity = Eigen::MatrixXd::Identity(weights[i].cols(), weights[i].cols());
-//        identity.bottomRightCorner(identity.rows(), identity.cols() / 2) = MatrixXd::Zero(identity.rows(), identity.cols() / 2);
-//        newW.push_back(weights[i] * identity);
-//        if (identity.rows() % 2)
-//            identity(identity.rows() / 2, identity.rows() / 2) = 0;
-//        //std::cout << newW[i].rows() << " " << newW[i].cols() << std::endl << weights[i].rows() << " " << weights[i].cols();
-//        newW[i] = newW[i] + net.weights[i] * identity.reverse();
-//        newB.push_back((biases[i] + net.biases[i]) / 2);
-//    }
-//    return Network(newW, newB, out);
-//}
-
 #include <random>
 
 Network Network::crossover(const Network& net, double mutationRate, double mutationStrength)
