@@ -68,11 +68,10 @@ void NetworkDebug()
 int main()
 {
     Screen scr(30, 30);
-    Population pop(500, 200, { 24, 32, 32, 3 }, &scr);
+    Population pop(2000, 200, { 24, 32, 32, 3 }, &scr);
 
     while (true)
     {
         pop.Run();
-        scr.Show(); // do the score and food thing
     }
 }

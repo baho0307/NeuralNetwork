@@ -131,6 +131,9 @@ void Snake::Draw(std::string* str)
     {
         scr[body[i](0) + body[i](1) * size(0)] = 'B';
     }
+    scr[0] = ((score / 100) % 10) + '0';
+    scr[1] = ((score / 10) % 10) + '0';
+    scr[2] = (score % 10) + '0';
     *str = scr;
 }
 
