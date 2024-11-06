@@ -2,23 +2,18 @@
 
 Food::Food()
 {
-	foods.push_back(Eigen::Vector2i((int)rnd.getRand(x/4, 3*x/4), (int)rnd.getRand(y / 4, 3 * y / 4)));
+	food = Eigen::Vector2i((int)rnd.getRand(max_x/4, 3*max_x/4), (int)rnd.getRand(max_y / 4, 3 * max_y / 4));
 }
 
 Food::Food(int size_x, int size_y)
 {
-	x = size_x;
-	y = size_y;
-	foods.push_back(Eigen::Vector2i((int)rnd.getRand(x / 4, 3 * x / 4), (int)rnd.getRand(y / 4, 3 * y / 4)));
+	max_x = size_x;
+	max_y = size_y;
+	food = (Eigen::Vector2i((int)rnd.getRand(max_x / 4, 3 * max_x / 4), (int)rnd.getRand(max_y / 4, 3 * max_y / 4)));
 }
 
 void Food::create()
 {
-	foods.push_back(Eigen::Vector2i((int)rnd.getRand(x / 4, 3 * x / 4), (int)rnd.getRand(y / 4, 3 * y / 4)));
+	food = (Eigen::Vector2i((int)rnd.getRand(max_x / 4, 3 * max_x / 4), (int)rnd.getRand(max_y / 4, 3 * max_y / 4)));
 }
 
-void Food::generate()
-{
-	foods.clear();
-	foods.push_back(Eigen::Vector2i((int)rnd.getRand(x / 4, 3 * x / 4), (int)rnd.getRand(y / 4, 3 * y / 4)));
-}

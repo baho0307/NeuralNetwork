@@ -53,14 +53,15 @@ private:
 public:
 	Snake();
 	Snake(const Snake& other);
-	Snake(Network brain, Food* f, int life, int x, int y);
-	Snake(std::vector<int> brain, Food* f, int life, int  x, int y);
+	Snake(Network brain, int life, int x, int y);
+	Snake(std::vector<int> brain, int life, int  x, int y);
 
 	bool getDead();
 	double getFitness();
+	int getScore();
 
 	void Move();
-	void Draw(std::string *str);
+	void Draw(std::string *str, int maxScore);
 	Snake crossover(Snake& other);
 };
 

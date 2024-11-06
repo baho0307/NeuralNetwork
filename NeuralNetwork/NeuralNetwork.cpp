@@ -67,8 +67,8 @@ void NetworkDebug()
 
 int main()
 {
-    Screen scr(30, 30);
-    Population pop(2000, 200, { 24, 32, 32, 3 }, &scr);
+    Screen scr(40, 30);
+    Population pop(2000, 200, { 23, 32, 32, 3}, &scr);
 
     while (true)
     {

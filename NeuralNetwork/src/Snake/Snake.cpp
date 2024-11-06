@@ -8,12 +8,12 @@ Snake::Snake(const Snake& other)
     dead = false;
     lifeTime = 0;
     lastTime = 0;
-    score = 0;
-    food = other.food;
+    score = 3;
     f_i = 0;
     net = other.net;
     input = VectorXd(24);
     size = other.size;
+    food = new Food(size.x(), size.y());
     hLoc = size / 2;
     dir = UP;
     createBody(); createBody(); createBody(); createBody();
@@ -23,10 +23,13 @@ void Snake::eat()
 {
     score++;
     f_i++;
-    life += 100;
+    if (life < 300)
+        life += 200;
     createBody();
-    if (f_i >= food->foods.size())
+    do 
+    {
         food->create();
+    } while (bodyCollide(food->food));
 }
 
 void Snake::createBody()
@@ -51,15 +54,15 @@ Snake::Snake()
 {
 }
 
-Snake::Snake(Network brain, Food* f, int life, int x, int y)
+Snake::Snake(Network brain, int life, int x, int y)
 {
     this->life = life;
     fitness = 0;
     dead = false;
     lifeTime = 0;
     lastTime = 0;
-    score = 0;
-    food = f;
+    score = 3;
+    food = new Food(x, y);
     f_i = 0;
     net = brain;
     input = VectorXd(24);
@@ -70,16 +73,16 @@ Snake::Snake(Network brain, Food* f, int life, int x, int y)
     createBody(); createBody(); createBody(); createBody();
 }
 
-Snake::Snake(std::vector<int> brain, Food* f, int life, int x, int y)
+Snake::Snake(std::vector<int> brain, int life, int x, int y)
 {
 	this->life = life;
     fitness = 0;
     dead = false;
     lifeTime = 0;
     lastTime = 0;
-    score = 0;
+    score = 3;
     f_i = 0;
-    food = f;
+    food = new Food(x, y);
 	net = Network(brain);
 	input = VectorXd(24);
 	size(0) = x;
@@ -96,15 +99,13 @@ bool Snake::getDead()
 
 double Snake::getFitness()
 {
-    if (score < 10) {
-        fitness = floor(lifeTime * lifeTime) * pow(2, score);
-    }
-    else {
-        fitness = floor(lifeTime * lifeTime);
-        fitness *= pow(2, 10);
-        fitness *= (score - 9);
-    }
+    fitness = log(pow(3, score) * lifeTime);
     return fitness;
+}
+
+int Snake::getScore()
+{
+    return score;
 }
 
 void Snake::Move()
@@ -122,10 +123,10 @@ void Snake::Move()
     }
 }
 
-void Snake::Draw(std::string* str)
+void Snake::Draw(std::string* str, int maxScore)
 {
     std::string scr(size(0) * size(1), ' ');
-    scr[(food->foods)[f_i](0) + (food->foods)[f_i](1) * size(0)] = 'F';
+    scr[(food->food)(0) + (food->food)(1) * size(0)] = 'F';
     scr[hLoc(0) + hLoc(1) * size(0)] = 'H';
     for (int i = 0; i < body.size(); i++)
     {
@@ -134,12 +135,16 @@ void Snake::Draw(std::string* str)
     scr[0] = ((score / 100) % 10) + '0';
     scr[1] = ((score / 10) % 10) + '0';
     scr[2] = (score % 10) + '0';
+
+    scr[4] = ((maxScore / 100) % 10) + '0';
+    scr[5] = ((maxScore / 10) % 10) + '0';
+    scr[6] = (maxScore % 10) + '0';
     *str = scr;
 }
 
 Snake Snake::crossover(Snake& other)
 {
-    Snake newS(net.crossover(other.net, 0.2,1.0), food, 100, size(0), size(1));
+    Snake newS(net.crossover(other.net, 0.1,0.1), 200, size(0), size(1));
     return newS;
 }
 
@@ -168,7 +173,7 @@ bool Snake::bodyCollide(Eigen::Vector2i pos)
 
 bool Snake::foodCollide(Eigen::Vector2i pos)
 {
-    return pos == (food->foods)[f_i];
+    return pos == (food->food);
 }
 
 bool Snake::wallCollide(Eigen::Vector2i pos)
@@ -191,7 +196,7 @@ Eigen::Vector3d Snake::lookInDirection(Eigen::Vector2i _dir)
         if (!foodFound && foodCollide(pos))
         {
             foodFound = true; //input size can be decreased to 12
-            look(0) = 1;
+            look(0) = 1 / distance;
         }
         if (!bodyFound && bodyCollide(pos))
         {

@@ -8,12 +8,11 @@ class Food
 public:
 	Food();
 	Food(int size_x, int size_y);
-	std::vector<Eigen::Vector2i> foods;
 	Random rnd;
 	void create();
-	void generate();
+	Eigen::Vector2i food;
 private:
-	int x;
-	int y;
+	int max_x;
+	int max_y;
 };
 
