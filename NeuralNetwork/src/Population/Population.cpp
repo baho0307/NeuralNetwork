@@ -23,9 +23,10 @@ void Population::calcGen() //calculate the best snake and replace it to the firs
 	{
 		if (pop[i].getFitness() > pop[maxIndice].getFitness())
 		{
-            max_popscore = pop[i].getScore();
 			maxIndice = i;
 		}
+        if (pop[i].getScore() > max_popscore)
+            max_popscore = pop[i].getScore();
 	}
 
     std::swap(pop[0], pop[maxIndice]);
@@ -40,7 +41,7 @@ void Population::newGeneration()
 	newSnakes.push_back(Snake(pop[0]));
 	for (int i = 1; i < pop.size(); i++)
 	{
-		newSnakes.push_back(pop[0].crossover(pop[i], mutationRate, 0.2)); // crossing over all of the snakes with the best gen(best snake)
+		newSnakes.push_back(pop[0].crossover(pop[i], mutationRate, 0.5)); // crossing over all of the snakes with the best gen(best snake)
 	}
 	pop = newSnakes;
 }

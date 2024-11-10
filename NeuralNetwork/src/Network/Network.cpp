@@ -43,7 +43,7 @@ static std::string toString(const Eigen::MatrixXd& mat) {
 }
 
 static Eigen::VectorXd sigmoid(const Eigen::VectorXd& input) {
-    return 1.0 / (1.0 + (-input.array()).exp());
+    return (2.0 / (1.0 + (-input.array()).exp())) - 1;
 }
 
 static Eigen::VectorXd relu(const Eigen::VectorXd& input) {

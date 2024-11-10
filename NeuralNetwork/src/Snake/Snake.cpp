@@ -96,11 +96,12 @@ bool Snake::getDead()
 double Snake::getFitness()
 {
     if (score < 10) {
-        fitness = floor(lifeTime * lifeTime) + pow(2, score);
+        fitness = floor(lifeTime) * pow(2, score);
     }
-    else {
-        fitness = floor(lifeTime * lifeTime);
-        fitness += pow(2, 10);
+    else 
+    {
+        fitness = floor(lifeTime);
+        fitness *= pow(2, 10);
         fitness *= (score - 9);
     }
 

@@ -11,6 +11,7 @@ private:
 	std::vector<Snake>	pop;
 	Screen* scr;
 	std::string*		addr;
+	Random random;
 
 	void newGeneration();
 	void calcGen();
@@ -23,11 +24,10 @@ private:
 	int y;
 	int max_popscore = 0;
 	double avg_popscore;
-	double mutationRate = 0.05;
+	double mutationRate = 0.1;
 
 public:
 	Population(int count, int lifeTime, std::vector<int> layers, Screen *str);
 
 	void Run();
 };
-
