@@ -46,6 +46,10 @@ static Eigen::VectorXd sigmoid(const Eigen::VectorXd& input) {
     return 1.0 / (1.0 + (-input.array()).exp());
 }
 
+static Eigen::VectorXd relu(const Eigen::VectorXd& input) {
+    return input.cwiseMax(0.0);
+}
+
 #include <random>
 
 Network Network::crossover(const Network& net, double mutationRate, double mutationStrength)
@@ -121,7 +125,7 @@ void Network::calc(VectorXd in)
     VectorXd r = in;
     for (int i = 0; i < weights.size(); i++)
     {
-        r = sigmoid((weights[i] * r) + biases[i]);
+        r = sigmoid((weights[i] * r) + biases[i]); // relu or sigmoid
     }
     out = r;
 }

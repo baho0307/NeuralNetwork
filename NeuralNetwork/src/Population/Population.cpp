@@ -18,22 +18,17 @@ Population::Population(int count, int lifeTime, std::vector<int> layers, Screen 
 
 void Population::calcGen() //calculate the best snake and replace it to the first indice
 {
-	int max_indice = 0;
-    int max_popfit = 0;
-	Snake temp = pop[0];
-
+	int maxIndice = 0;
 	for (int i = 0; i < pop.size(); i++)
 	{
-		if (max_popfit < pop[i].getFitness())
+		if (pop[i].getFitness() > pop[maxIndice].getFitness())
 		{
-			max_popfit = pop[i].getFitness();
             max_popscore = pop[i].getScore();
-			max_indice = i;
+			maxIndice = i;
 		}
 	}
-	
-	pop[0] = pop[max_indice];
-	pop[max_indice] = temp;
+
+    std::swap(pop[0], pop[maxIndice]);
 }
 
 void Population::newGeneration()
@@ -41,10 +36,11 @@ void Population::newGeneration()
 	std::vector<Snake> newSnakes;
 
 	calcGen();
+
 	newSnakes.push_back(Snake(pop[0]));
 	for (int i = 1; i < pop.size(); i++)
 	{
-		newSnakes.push_back(pop[0].crossover(pop[i])); // crossing over all of the snakes with the best gen(best snake)
+		newSnakes.push_back(pop[0].crossover(pop[i], mutationRate, 0.2)); // crossing over all of the snakes with the best gen(best snake)
 	}
 	pop = newSnakes;
 }
@@ -92,10 +88,10 @@ void Population::Run()
 
         // Wait for all threads to finish
         for (auto& t : threads) {
-            if (t.joinable()) {  // Ensure the thread is joinable before calling join
+            if (t.joinable()) 
                 t.join();
-            }
         }
+        threads.clear();
 
         // Check if all snakes are dead
         for (int i = 0; i < pop.size(); i++) {

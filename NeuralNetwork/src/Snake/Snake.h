@@ -18,11 +18,10 @@ private:
 	bool dead;
 	int life;
 	int lifeTime;
-	int lastTime;
 	int score;
 	double fitness;
 	int f_i;
-	Food *food;
+	std::shared_ptr<Food> food;
 	Eigen::Vector2i size;
 	Eigen::Vector2i hLoc;
 	std::vector<Eigen::Vector2i> body;
@@ -53,6 +52,7 @@ private:
 public:
 	Snake();
 	Snake(const Snake& other);
+	Snake& operator=(const Snake& other);
 	Snake(Network brain, int life, int x, int y);
 	Snake(std::vector<int> brain, int life, int  x, int y);
 
@@ -62,6 +62,6 @@ public:
 
 	void Move();
 	void Draw(std::string *str, int maxScore);
-	Snake crossover(Snake& other);
+	Snake crossover(Snake& other, double mutationRate, double mutationStrength);
 };
 

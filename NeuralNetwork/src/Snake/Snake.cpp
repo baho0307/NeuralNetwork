@@ -3,28 +3,48 @@
 
 Snake::Snake(const Snake& other)
 {
-    this->life = 100;// life must be variable
+    this->life = 200;// life must be variable
     fitness = 0;
     dead = false;
     lifeTime = 0;
-    lastTime = 0;
     score = 3;
     f_i = 0;
     net = other.net;
     input = VectorXd(24);
     size = other.size;
-    food = new Food(size.x(), size.y());
+    food = std::make_shared<Food>(size.x(), size.y());
     hLoc = size / 2;
     dir = UP;
     createBody(); createBody(); createBody(); createBody();
+}
+
+Snake& Snake::operator=(const Snake& other) 
+{
+    if (this != &other) {
+        life = other.life;
+        fitness = other.fitness;
+        dead = other.dead;
+        lifeTime = other.lifeTime;
+        score = other.score;
+        f_i = other.f_i;
+        net = other.net;
+        input = other.input;
+        size = other.size;
+        hLoc = other.hLoc;
+        dir = other.dir;
+        food = std::make_unique<Food>(*other.food); // Deep copy
+        body = other.body;
+        decision = other.decision;
+    }
+    return *this;
 }
 
 void Snake::eat()
 {
     score++;
     f_i++;
-    if (life < 300)
-        life += 200;
+    if (life < 500)
+        life += 100;
     createBody();
     do 
     {
@@ -34,20 +54,8 @@ void Snake::eat()
 
 void Snake::createBody()
 {
-    if (body.size() > 0)
-    {
-        if (dir % 2)
-            body.push_back(Eigen::Vector2i(body[body.size() - 1](0) - dir, body[body.size() - 1](1)));
-        else
-            body.push_back(Eigen::Vector2i(body[body.size() - 1](0), body[body.size() - 1](1) - dir));
-    }
-    else
-    {
-        if (dir % 2)
-            body.push_back(Eigen::Vector2i(hLoc(0) - dir, hLoc(1)));
-        else
-            body.push_back(Eigen::Vector2i(hLoc(0), hLoc(1) - dir));
-    }
+    Eigen::Vector2i lastSegment = (body.size() > 0) ? body.back() : hLoc;
+    body.push_back(lastSegment + ((dir % 2) ? Eigen::Vector2i(-dir, 0) : Eigen::Vector2i(0, -dir)));
 }
 
 Snake::Snake()
@@ -55,21 +63,10 @@ Snake::Snake()
 }
 
 Snake::Snake(Network brain, int life, int x, int y)
-{
-    this->life = life;
-    fitness = 0;
-    dead = false;
-    lifeTime = 0;
-    lastTime = 0;
-    score = 3;
-    food = new Food(x, y);
-    f_i = 0;
-    net = brain;
-    input = VectorXd(24);
-    size(0) = x;
-    size(1) = y;
-    hLoc = size / 2;
-    dir = UP;
+    : life(life), fitness(0), dead(false), lifeTime(0), score(3)
+    , f_i(0), net(brain), input(VectorXd(24)), size(x, y),
+    hLoc(size / 2), dir(UP) {
+    food = std::make_shared<Food>(size.x(), size.y());
     createBody(); createBody(); createBody(); createBody();
 }
 
@@ -79,10 +76,9 @@ Snake::Snake(std::vector<int> brain, int life, int x, int y)
     fitness = 0;
     dead = false;
     lifeTime = 0;
-    lastTime = 0;
     score = 3;
     f_i = 0;
-    food = new Food(x, y);
+    food = std::make_shared<Food>(size.x(), size.y());
 	net = Network(brain);
 	input = VectorXd(24);
 	size(0) = x;
@@ -99,8 +95,16 @@ bool Snake::getDead()
 
 double Snake::getFitness()
 {
-    fitness = log(pow(3, score) * lifeTime);
-    return fitness;
+    if (score < 10) {
+        fitness = floor(lifeTime * lifeTime) + pow(2, score);
+    }
+    else {
+        fitness = floor(lifeTime * lifeTime);
+        fitness += pow(2, 10);
+        fitness *= (score - 9);
+    }
+
+    return (fitness);
 }
 
 int Snake::getScore()
@@ -110,17 +114,17 @@ int Snake::getScore()
 
 void Snake::Move()
 {
-    if (!dead)
-    {
-        Look();
-        Think();
-        lifeTime++;
-        life--;
-        if (foodCollide(hLoc))
-            eat();
-        shiftBody();
-        dead = life <= 0 || bodyCollide(hLoc) || wallCollide(hLoc);
-    }
+    if (dead) return;
+
+    Look();
+    Think();
+    lifeTime++;
+    life--;
+
+    if (foodCollide(hLoc))
+        eat();
+    shiftBody();
+    dead = life <= 0 || bodyCollide(hLoc) || wallCollide(hLoc);
 }
 
 void Snake::Draw(std::string* str, int maxScore)
@@ -142,23 +146,19 @@ void Snake::Draw(std::string* str, int maxScore)
     *str = scr;
 }
 
-Snake Snake::crossover(Snake& other)
+Snake Snake::crossover(Snake& other, double mutationRate, double mutationStrength)
 {
-    Snake newS(net.crossover(other.net, 0.1,0.1), 200, size(0), size(1));
+    Snake newS(net.crossover(other.net, mutationRate, mutationStrength), 200, size(0), size(1));
     return newS;
 }
 
 void Snake::shiftBody()
 {
-    Eigen::Vector2i temp = hLoc;
-    hLoc += relative(Eigen::Vector2i(0, 1), dir);
-    Eigen::Vector2i temp2;
-    for (int i = 0; i < body.size(); i++)
-    {
-        temp2 = body[i];
-        body[i] = temp;
-        temp = temp2;
+    for (int i = body.size() - 1; i > 0; --i) {
+        body[i] = body[i - 1];
     }
+    body[0] = hLoc;
+    hLoc += relative(Eigen::Vector2i(0, 1), dir);
 }
 
 bool Snake::bodyCollide(Eigen::Vector2i pos)
@@ -196,65 +196,40 @@ Eigen::Vector3d Snake::lookInDirection(Eigen::Vector2i _dir)
         if (!foodFound && foodCollide(pos))
         {
             foodFound = true; //input size can be decreased to 12
-            look(0) = 1 / distance;
+            look(0) = 1 / (distance);
         }
         if (!bodyFound && bodyCollide(pos))
         {
             bodyFound = true;
-            look(1) = 1 / distance;
+            look(1) =  1 / (distance);
         }
         pos = pos + dir;
         distance++;
     }
-    look[2] = 1 / distance;
+    look[2] = 1 / (distance);
     return look;
 }
 
 void Snake::Look()
 {
-    Eigen::VectorXd temp = lookInDirection(Eigen::Vector2i(-1/*SIZE*/, 0));
-    input.segment(0, 3) = temp;
-
-    temp = lookInDirection(Eigen::Vector2i(-1/*SIZE*/, -1/*SIZE*/));
-    input.segment(3, 3) = temp;
-
-    temp = lookInDirection(Eigen::Vector2i(0, -1/*SIZE*/));
-    input.segment(6, 3) = temp;
-
-    temp = lookInDirection(Eigen::Vector2i(1/*SIZE*/, -1/*SIZE*/));
-    input.segment(9, 3) = temp;
-
-    temp = lookInDirection(Eigen::Vector2i(1/*SIZE*/, 0));
-    input.segment(12, 3) = temp;
-
-    temp = lookInDirection(Eigen::Vector2i(1/*SIZE*/, 1/*SIZE*/));
-    input.segment(15, 3) = temp;
-
-    temp = lookInDirection(Eigen::Vector2i(0, 1/*SIZE*/));
-    input.segment(18, 3) = temp;
-
-    temp = lookInDirection(Eigen::Vector2i(-1/*SIZE*/, 1/*SIZE*/));
-    input.segment(21, 3) = temp;
+    std::vector<Eigen::Vector2i> directions = {
+        {-1, 0}, {-1, -1}, {0, -1}, {1, -1},
+        {1, 0}, {1, 1}, {0, 1}, {-1, 1}
+    };
+    for (int i = 0; i < directions.size(); i++) {
+        input.segment(i * 3, 3) = lookInDirection(directions[i]);
+    }
 }
 
 void Snake::Think()
 {
+    int maxIndex;
     net.calc(input);
     decision = net.getOut();
-    int maxIndex = 0;
     decision.maxCoeff(&maxIndex);
 
-    switch (maxIndex) {
-    case 0:
-        moveUp();
-        break;
-    case 1:
-        moveRight();
-        break;
-    case 2:
-        moveLeft();
-        break;
-    }
+    static std::array<void(Snake::*)(), 3> moves = { &Snake::moveUp, &Snake::moveRight, &Snake::moveLeft };
+    (this->*moves[maxIndex])();
 }
 
 void Snake::moveUp()

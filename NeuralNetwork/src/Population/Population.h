@@ -22,6 +22,8 @@ private:
 	int x;
 	int y;
 	int max_popscore = 0;
+	double avg_popscore;
+	double mutationRate = 0.05;
 
 public:
 	Population(int count, int lifeTime, std::vector<int> layers, Screen *str);
