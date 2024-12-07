@@ -68,10 +68,29 @@ void NetworkDebug()
 int main()
 {
     Screen scr(50, 30);
-    Population pop(2000, 200, { 23, 32, 32, 3}, &scr);
+    Population pop(2000, 2000, { 24, 64, 32, 32, 16, 3}, &scr);
+
+    bool dKeyPressed = false; // 'D' tuþunun mevcut durumu
+    bool wasDKeyReleased = true; // 'D' tuþunun önceki durumu (baþlangýçta serbest)
 
     while (true)
     {
-        pop.Run();
+        // 'D' tuþunun durumunu kontrol et
+        bool isDKeyPressed = (GetAsyncKeyState('D') & 0x8001) != 0; // 'D' tuþunun basýlý olup olmadýðý
+
+        // Tuþun serbest býrakýldýðý durum
+        if (!isDKeyPressed && wasDKeyReleased)
+        {
+            // Tuþ serbest býrakýldýðýnda flip-flop iþlemi
+            dKeyPressed = !dKeyPressed; // Flip-Flop: mevcut durumu tersine çevir
+            wasDKeyReleased = false; // Artýk tuþ serbest býrakýlmadý
+        }
+        else if (isDKeyPressed)
+        {
+            wasDKeyReleased = true; // Tuþ basýlý olduðu için serbest býrakýldý olarak iþaretle
+        }
+
+        // pop.Run() fonksiyonu, dKeyPressed deðiþkenine baðlý olarak cizim yapacak
+        pop.Run(dKeyPressed);
     }
 }

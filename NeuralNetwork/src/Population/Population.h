@@ -15,7 +15,9 @@ private:
 
 	void newGeneration();
 	void calcGen();
-	void processGroup(int startIdx, int endIdx);
+	void generateSnakeSubset(int startIdx, int endIdx, std::vector<Snake>& newSnakes);
+	void createSnakeSubset(int startIdx, int endIdx, std::vector<int> layers, int lifetime, std::vector<Snake>& newSnakes);
+	void processGroup(int startIdx, int endIdx, bool draw);
 	bool dead = false;
 
 	const int groupSize = 200;
@@ -23,11 +25,11 @@ private:
 	int x;
 	int y;
 	int max_popscore = 0;
-	double avg_popscore;
-	double mutationRate = 0.1;
+	double max_fitness = 0;
+	double mutationRate = 0.05;
 
 public:
 	Population(int count, int lifeTime, std::vector<int> layers, Screen *str);
 
-	void Run();
+	void Run(bool draw = true);
 };
