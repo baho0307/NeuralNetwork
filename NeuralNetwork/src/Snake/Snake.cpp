@@ -3,14 +3,14 @@
 
 Snake::Snake(const Snake& other)
 {
-    this->life = 1000;// life must be variable
+    this->life, this->start_life = other.start_life;
     fitness = 0;
     dead = false;
     lifeTime = 0;
     score = 3;
     f_i = 0;
     net = other.net;
-    input = VectorXd(24);
+    input = VectorXd(net.getInput());
     size = other.size;
     food = std::make_shared<Food>(size.x(), size.y());
     hLoc = size / 2;
@@ -21,7 +21,8 @@ Snake::Snake(const Snake& other)
 Snake& Snake::operator=(const Snake& other) 
 {
     if (this != &other) {
-        life = other.life;
+        start_life = other.start_life;
+        life = other.start_life;
         fitness = other.fitness;
         dead = other.dead;
         lifeTime = other.lifeTime;
@@ -63,8 +64,8 @@ Snake::Snake()
 }
 
 Snake::Snake(Network brain, int life, int x, int y)
-    : life(life), fitness(0), dead(false), lifeTime(0), score(3)
-    , f_i(0), net(brain), input(VectorXd(24)), size(x, y),
+    : start_life(life), life(life), fitness(0), dead(false), lifeTime(0), score(3)
+    , f_i(0), net(brain), input(brain.getInput()), size(x, y),
     hLoc(size / 2), dir(UP) {
     food = std::make_shared<Food>(size.x(), size.y());
     createBody(); createBody(); createBody(); createBody();
@@ -72,6 +73,7 @@ Snake::Snake(Network brain, int life, int x, int y)
 
 Snake::Snake(std::vector<int> brain, int life, int x, int y)
 {
+    start_life = life;
 	this->life = life;
     fitness = 0;
     dead = false;
@@ -80,7 +82,7 @@ Snake::Snake(std::vector<int> brain, int life, int x, int y)
     f_i = 0;
     food = std::make_shared<Food>(size.x(), size.y());
 	net = Network(brain);
-	input = VectorXd(24);
+	input = VectorXd(brain[0]);
 	size(0) = x;
 	size(1) = y;
     hLoc = size / 2;
@@ -96,12 +98,12 @@ bool Snake::getDead()
 double Snake::getFitness()
 {
     if (score < 10) {
-        fitness = floor( lifeTime) * pow(2, score);
+        fitness = floor( lifeTime)/log(size(0)* size(1)) + pow(2, score);
     }
     else 
     {
-        fitness = floor(lifeTime);
-        fitness *= pow(2, 10);
+        fitness = floor(lifeTime) / log(size(0) * size(1));
+        fitness += pow(2, 10);
         fitness *= (score - 9);
     }
 
@@ -130,38 +132,38 @@ void Snake::Move()
 
 void Snake::Draw(std::string* str, int maxScore)
 {
-    // Çerçeve boyutlarını belirle
-    int width = size(0); // Çerçeve ekran boyutuna dahil
-    int height = size(1); // Çerçeve ekran boyutuna dahil
+    // Define the frame dimensions
+    int width = size(0);
+    int height = size(1);
 
-    // Çerçeve boyutunda ekran oluştur
+    // Create the screen with the frame dimensions
     std::string scr(width * height, ' ');
 
-    // Çerçeve çizimi (tekli çizgi karakterleri kullanılarak)
+    // Draw the frame (using single-line characters)
     for (int y = 0; y < height; ++y)
     {
-        scr[y * width] = '\xB3'; // Sol kenar (│)
-        scr[(y + 1) * width - 1] = '\xB3'; // Sağ kenar (│)
+        scr[y * width] = '\xB3'; // Left edge (│)
+        scr[(y + 1) * width - 1] = '\xB3'; // Right edge (│)
     }
     for (int x = 0; x < width; ++x)
     {
-        scr[x] = '\xC4'; // Üst kenar (─)
-        scr[x + (height - 1) * width] = '\xC4'; // Alt kenar (─)
+        scr[x] = '\xC4'; // Top edge (─)
+        scr[x + (height - 1) * width] = '\xC4'; // Bottom edge (─)
     }
 
-    // Köşeler
-    scr[0] = '\xDA'; // Sol üst köşe (┌)
-    scr[width - 1] = '\xBF'; // Sağ üst köşe (┐)
-    scr[(height - 1) * width] = '\xC0'; // Sol alt köşe (└)
-    scr[height * width - 1] = '\xD9'; // Sağ alt köşe (┘)
+    // Corners
+    scr[0] = '\xDA'; // Top-left corner (┌)
+    scr[width - 1] = '\xBF'; // Top-right corner (┐)
+    scr[(height - 1) * width] = '\xC0'; // Bottom-left corner (└)
+    scr[height * width - 1] = '\xD9'; // Bottom-right corner (┘)
 
-    // Yem çizimi
+    // Draw the food
     scr[(food->food)(0) + (food->food)(1) * width] = '#';
 
-    // Baş çizimi
-    scr[hLoc(0) + hLoc(1) * width] = '\xFE'; // Baş için seçilen karakter
+    // Draw the head
+    scr[hLoc(0) + hLoc(1) * width] = '\xFE'; // Character chosen for the head
 
-    // Gövde çizimi
+    // Draw the body
     for (int i = 0; i < body.size(); i++)
     {
         char part = 'o';
@@ -169,8 +171,8 @@ void Snake::Draw(std::string* str, int maxScore)
         if (i == 0)
         {
             auto diff = hLoc - body[i];
-            if (abs(diff.x()) == 1) part = '\xCD';          // Yatay (═)
-            else if (abs(diff.y()) == 1) part = '\xBA';    // Dikey (║)
+            if (abs(diff.x()) == 1) part = '\xCD';          // Horizontal (═)
+            else if (abs(diff.y()) == 1) part = '\xBA';    // Vertical (║)
         }
         else
         {
@@ -178,24 +180,24 @@ void Snake::Draw(std::string* str, int maxScore)
             auto nextDiff = (i + 1 < body.size()) ? (body[i + 1] - body[i]) : (body[i] - body[i - 1]);
 
             if ((prevDiff.x() == 1 && nextDiff.y() == 1) || (prevDiff.y() == 1 && nextDiff.x() == 1))
-                part = '\xC9'; // Sol üst köşe (╔)
+                part = '\xC9'; // Top-left corner (╔)
             else if ((prevDiff.x() == -1 && nextDiff.y() == 1) || (prevDiff.y() == 1 && nextDiff.x() == -1))
-                part = '\xBB'; // Sağ üst köşe (╗)
+                part = '\xBB'; // Top-right corner (╗)
             else if ((prevDiff.x() == 1 && nextDiff.y() == -1) || (prevDiff.y() == -1 && nextDiff.x() == 1))
-                part = '\xC8'; // Sol alt köşe (╚)
+                part = '\xC8'; // Bottom-left corner (╚)
             else if ((prevDiff.x() == -1 && nextDiff.y() == -1) || (prevDiff.y() == -1 && nextDiff.x() == -1))
-                part = '\xBC'; // Sağ alt köşe (╝)
+                part = '\xBC'; // Bottom-right corner (╝)
             else if (prevDiff.x() != 0 || nextDiff.x() != 0)
-                part = '\xCD'; // Yatay çizgi (═)
+                part = '\xCD'; // Horizontal line (═)
             else if (prevDiff.y() != 0 || nextDiff.y() != 0)
-                part = '\xBA'; // Dikey çizgi (║)
+                part = '\xBA'; // Vertical line (║)
         }
 
         scr[body[i](0) + body[i](1) * width] = part;
     }
 
-    // Skor ve maksimum skor çizimi (ekranın üst kısmına yerleştirilir)
-    if (scr.size() > 12)
+    // Draw the score and maximum score (placed at the top of the screen)
+    if (scr.size() / size(0) > 9)
     {
         scr[2] = ((score / 100) % 10) + '0';
         scr[3] = ((score / 10) % 10) + '0';
@@ -206,16 +208,13 @@ void Snake::Draw(std::string* str, int maxScore)
         scr[8] = (maxScore % 10) + '0';
     }
 
-    // Çizimi döndür
+    // Return the drawing
     *str = scr;
 }
 
-
-
-
 Snake Snake::crossover(Snake& other, double mutationRate, double mutationStrength)
 {
-    Snake newS(net.crossover(other.net, mutationRate, mutationStrength), 200, size(0), size(1));
+    Snake newS(net.crossover(other.net, mutationRate, mutationStrength), other.start_life, size(0), size(1));
     return newS;
 }
 
@@ -262,7 +261,7 @@ Eigen::Vector3d Snake::lookInDirection(Eigen::Vector2i _dir)
     {
         if (!foodFound && foodCollide(pos))
         {
-            foodFound = true; //input size can be decreased to 12
+            foodFound = true; 
             look(0) = 1 / (distance);
         }
         if (!bodyFound && bodyCollide(pos))
@@ -320,6 +319,8 @@ void Snake::moveRight()
         dir = DIR(dir * -2);
 }
 
+
+// Get Snake Relative Direction
 Eigen::Vector2i Snake::relative(Eigen::Vector2i vec, DIR dir)
 {
     Eigen::Vector2i rltVector = vec;

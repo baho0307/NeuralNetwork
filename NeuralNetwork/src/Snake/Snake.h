@@ -17,6 +17,7 @@ class Snake
 private:
 	bool dead;
 	int life;
+	int start_life;
 	int lifeTime;
 	int score;
 	double fitness;

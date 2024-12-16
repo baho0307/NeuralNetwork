@@ -7,6 +7,7 @@ Network::Network()
 
 Network::Network(std::vector<MatrixXd> weights, std::vector<VectorXd> biases, VectorXd out)
 {
+    input_size = weights[0].cols();
     this->weights = weights;
     this->biases = biases;
     this->out = out;
@@ -14,6 +15,7 @@ Network::Network(std::vector<MatrixXd> weights, std::vector<VectorXd> biases, Ve
 
 Network::Network(std::vector<int> layers)
 {
+    input_size = layers[0];
     for (int i = 1; i < layers.size(); i++)
     {
         weights.push_back(MatrixXd(layers[i], layers[i - 1]));
@@ -32,7 +34,7 @@ Network Network::operator=(const Network& net)
    	weights = net.weights;
 	biases = net.biases;
     out = net.out;
-
+    input_size = net.input_size;
     return Network(weights, biases, out);
 }
 
@@ -118,14 +120,12 @@ Network Network::crossover(const Network& net, double mutationRate, double mutat
     return Network(newW, newB, out);
 }
 
-
-
 void Network::calc(VectorXd in)
 {
     VectorXd r = in;
     for (int i = 0; i < weights.size(); i++)
     {
-        r = sigmoid((weights[i] * r) + biases[i]); // relu or sigmoid
+        r = sigmoid((weights[i] * r) + biases[i]); // Relu or Sigmoid
     }
     out = r;
 }
@@ -133,6 +133,11 @@ void Network::calc(VectorXd in)
 VectorXd Network::getOut()
 {
     return out;
+}
+
+int Network::getInput()
+{
+    return input_size;
 }
 
 #if DEBUG

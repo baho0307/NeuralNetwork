@@ -6,91 +6,31 @@
 
 using namespace Eigen;
 
-void NeuronTest()
-{
-    //layers
-    std::vector<Neuron> in(1, Neuron(std::vector<double>({ 0.5, 0 })));
-    std::vector<Neuron> out(1, Neuron(std::vector<double>({ 0.25, 0 })));
-    //debug
-    std::vector<double> outs;
-
-    //calculate with manual values
-    outs.push_back(in[0].calculate(std::vector<double>(1, 1)));
-    //calculate with previous neuron layer
-    outs.push_back(out[0].calculate(in));
-    std::cout << 1 << " -> " << outs[0] << " -> " << outs[1];
-}
-
-void NetworkDebug()
-{
-    float i = 0;
-    float debug_sp = 1;
-    // weights and neurons needs to be illustrated in terminal (for debug mode)
-    VectorXd a(2);
-    Screen scr(120, 30);
-    std::string* scraddr = scr.generate();
-    Network net(std::vector<int> {2, 8, 8, 4}, scraddr);
-
-    a(0) = 0.5;
-    a(1) = 1;
-    net.calc(a);
-    //net.getOut();
-    bool aKeyPressed = false;
-    bool dKeyPressed = false;
-
-    while (true)
-    {
-        if ((GetAsyncKeyState('A') & 0x8001) && !aKeyPressed) // 'A' tuþuna basýldýðýnda (ama daha önce basýlmamýþsa)
-        {
-            i -= debug_sp;
-            aKeyPressed = true;
-            dKeyPressed = false; // 'D' tuþunun basýlmadýðýndan emin olun
-        }
-        if ((GetAsyncKeyState('D') & 0x8001) && !dKeyPressed) // 'D' tuþuna basýldýðýnda (ama daha önce basýlmamýþsa)
-        {
-            i += debug_sp;
-            dKeyPressed = true;
-            aKeyPressed = false; // 'A' tuþunun basýlmadýðýndan emin olun
-        }
-        if ((GetAsyncKeyState('A') & 0x8001) == 0) // 'A' tuþu serbest býrakýldýðýnda
-        {
-            aKeyPressed = false;
-        }
-        if ((GetAsyncKeyState('D') & 0x8001) == 0) // 'D' tuþu serbest býrakýldýðýnda
-        {
-            dKeyPressed = false;
-        }
-        net.debug(i);
-        scr.Show();
-    }
-}
-
 int main()
 {
-    Screen scr(50, 30);
-    Population pop(2000, 2000, { 24, 64, 32, 32, 16, 3}, &scr);
+    Screen scr(12, 12); //For some reason the height should be higher than 10. MAx size is (120, 30)
+    Population pop(2000, 200, { 24, 64, 32, 32, 16, 3 }, &scr);
 
-    bool dKeyPressed = false; // 'D' tuþunun mevcut durumu
-    bool wasDKeyReleased = true; // 'D' tuþunun önceki durumu (baþlangýçta serbest)
+    bool dKeyPressed = false; // Current state of the 'D' key
+    bool wasDKeyReleased = true; // Previous state of the 'D' key (initially not pressed)
 
     while (true)
     {
-        // 'D' tuþunun durumunu kontrol et
-        bool isDKeyPressed = (GetAsyncKeyState('D') & 0x8001) != 0; // 'D' tuþunun basýlý olup olmadýðý
+        // Check the current state of the 'D' key
+        bool isDKeyPressed = (GetAsyncKeyState('D') & 0x8001) != 0; // Check if the 'D' key is pressed
 
-        // Tuþun serbest býrakýldýðý durum
+        // If the key is not pressed and was previously released
         if (!isDKeyPressed && wasDKeyReleased)
         {
-            // Tuþ serbest býrakýldýðýnda flip-flop iþlemi
-            dKeyPressed = !dKeyPressed; // Flip-Flop: mevcut durumu tersine çevir
-            wasDKeyReleased = false; // Artýk tuþ serbest býrakýlmadý
+            dKeyPressed = !dKeyPressed; // Toggle the dKeyPressed state (flip-flop)
+            wasDKeyReleased = false; // Mark as no longer released
         }
         else if (isDKeyPressed)
         {
-            wasDKeyReleased = true; // Tuþ basýlý olduðu için serbest býrakýldý olarak iþaretle
+            wasDKeyReleased = true; // Mark as released when the key is pressed
         }
 
-        // pop.Run() fonksiyonu, dKeyPressed deðiþkenine baðlý olarak cizim yapacak
+        // Call pop.Run(), which will draw based on dKeyPressed
         pop.Run(dKeyPressed);
     }
 }
