@@ -4,7 +4,7 @@ Screen::Screen(int hX, int hY)
 {
 	x = hX;
 	y = hY;
-	source = new std::string();
+	source = new std::vector<std::string>();
 	scrBuffer = std::string(x * y, ' ');
 	prevBuffer = std::string(x * y, ' ');
 	std::cout << scrBuffer;
@@ -18,7 +18,7 @@ void Screen::setCursorPosition(int x, int y)
 	SetConsoleCursorPosition(hOut, coord);
 }
 
-std::string* Screen::generate()
+std::vector<std::string>* Screen::generate()
 {
 	return source;
 }
@@ -32,19 +32,24 @@ void Screen::swap()
 	scrBuffer = tmp + std::string(x * y - tmp.length(), ' ');
 }
 
-void Screen::Show()
+void Screen::Show()// it gives some errors (to be fixed)
 {
-	prevBuffer = *source;
-	swap();
-	for (int i = 0; i < prevBuffer.size(); i++)
+	while (true)
 	{
-		if (scrBuffer[i] != prevBuffer[i])
+		prevBuffer = (*source)[0];
+		swap();
+		for (int i = 0; i < prevBuffer.size(); i++)
 		{
-			setCursorPosition((i % x), (i / x));
-			std::cout << scrBuffer[i];
+			if (scrBuffer[i] != prevBuffer[i])
+			{
+				setCursorPosition((i % x), (i / x));
+				std::cout << scrBuffer[i];
+			}
 		}
+		setCursorPosition(0, 0);
+		if (1 < source->size())
+			source->erase(source->begin());
 	}
-	setCursorPosition(0, 0);
 }
 
 int Screen::get_x()

@@ -7,7 +7,7 @@ Population::Population(int count, int lifeTime, std::vector<int> layers, Screen 
 	x = scr->get_x();
 	y = scr->get_y();
     // Create threads to manage different groups of snakes
-    const int batchSize = 200;
+    const int batchSize = groupSize;
     int numGroups = (count) / batchSize + ((count) % batchSize != 0 ? 1 : 0);
 
     // Launch threads to create each batch
@@ -37,6 +37,8 @@ void Population::calcGen() //calculate the best snake and replace it to the firs
 			maxIndice = i;
         if (pop[i].getScore() > max_popscore)
             max_popscore = pop[i].getScore();
+        if (pop[i].getScore() == (x - 2) * (y - 2) - 1 && pop.size() > best_pop.size())
+            best_pop.push_back(Snake(pop[i]));
 	}
     std::swap(pop[0], pop[maxIndice]);
 }
@@ -44,18 +46,25 @@ void Population::calcGen() //calculate the best snake and replace it to the firs
 void Population::generateSnakeSubset(int startIdx, int endIdx, std::vector<Snake>& newSnakes) {
     for (int i = startIdx; i < endIdx; ++i) 
     {
-        newSnakes[i] = pop[0].crossover(pop[i], mutationRate, 0.5); // crossing over with the best snake
+        newSnakes[i] = pop[0].crossover(pop[i], max_popscore > 2 * (x + y) ? mutationRate : mutationRate * 3, 0.5); // crossing over with the best snake
     }
 }
 
 void Population::createSnakeSubset(int startIdx, int endIdx, std::vector<int> layers, int lifeTime, std::vector<Snake>& newSnakes) {
     for (int i = startIdx; i < endIdx; ++i) 
     {
-        newSnakes[i] = Snake(layers, lifeTime, x, y); // crossing over with the best snake
+        newSnakes[i] = Snake(layers, lifeTime, x, y);
     }
 }
 
-void Population::newGeneration() {
+void Population::newGeneration() 
+{
+    if (best_pop.size() == pop.size())
+	{
+		pop = best_pop;
+		best_pop.clear();
+		return;
+	}
     calcGen(); // Ensure the best snake is first in the population
 
     // Create a new vector for the new generation of snakes
@@ -63,7 +72,7 @@ void Population::newGeneration() {
     newSnakes[0] = Snake(pop[0]); // Keep the best snake
 
     // Define the fixed batch size and calculate the number of groups
-    const int batchSize = 200;
+    const int batchSize = groupSize;
     int numGroups = (pop.size() - 1) / batchSize + ((pop.size() - 1) % batchSize != 0 ? 1 : 0);
 
     // Launch threads to perform crossover for each batch
@@ -83,7 +92,7 @@ void Population::newGeneration() {
     pop = std::move(newSnakes); // Replace the old population with the new one
 }
 
-void Population::processGroup(int startIdx, int endIdx, bool draw) 
+void Population::processGroup(int startIdx, int endIdx) 
 {
     bool dead_g;
     do 
@@ -93,10 +102,9 @@ void Population::processGroup(int startIdx, int endIdx, bool draw)
         {
             dead_g = dead_g && pop[i].getDead();
             pop[i].Move();
-            if (draw && i == 0)
+            if (i == 0)
             {
                 pop[0].Draw(addr, max_popscore);
-                scr->Show(); // do the score and food thing
             }
         }
     } while (!dead_g);
@@ -121,7 +129,7 @@ void Population::Run(bool draw)
         for (int g = 0; g < numGroups; ++g) {
             int startIdx = g * groupSize;
             int endIdx = min(startIdx + groupSize, (int)pop.size());
-            threads.push_back(std::thread(&Population::processGroup, this, startIdx, endIdx, draw));
+            threads.push_back(std::thread(&Population::processGroup, this, startIdx, endIdx));
         }
          
         // Wait for all threads to finish

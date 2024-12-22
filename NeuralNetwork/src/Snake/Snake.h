@@ -62,7 +62,7 @@ public:
 	int getScore();
 
 	void Move();
-	void Draw(std::string *str, int maxScore);
+	void Draw(std::vector<std::string> *src, int maxScore);
 	Snake crossover(Snake& other, double mutationRate, double mutationStrength);
 };
 

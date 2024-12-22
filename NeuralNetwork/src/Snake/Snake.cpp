@@ -3,7 +3,8 @@
 
 Snake::Snake(const Snake& other)
 {
-    this->life, this->start_life = other.start_life;
+    this->life = other.start_life;
+    this->start_life = other.start_life;
     fitness = 0;
     dead = false;
     lifeTime = 0;
@@ -15,7 +16,7 @@ Snake::Snake(const Snake& other)
     food = std::make_shared<Food>(size.x(), size.y());
     hLoc = size / 2;
     dir = UP;
-    createBody(); createBody(); createBody(); createBody();
+    createBody(); createBody();
 }
 
 Snake& Snake::operator=(const Snake& other) 
@@ -44,8 +45,8 @@ void Snake::eat()
 {
     score++;
     f_i++;
-    if (life < 2000 + score)
-        life += 100 + score;
+    if (life < 200 + score)
+        life += std::max(50, score);
     createBody();
     do 
     {
@@ -68,7 +69,7 @@ Snake::Snake(Network brain, int life, int x, int y)
     , f_i(0), net(brain), input(brain.getInput()), size(x, y),
     hLoc(size / 2), dir(UP) {
     food = std::make_shared<Food>(size.x(), size.y());
-    createBody(); createBody(); createBody(); createBody();
+    createBody(); createBody();
 }
 
 Snake::Snake(std::vector<int> brain, int life, int x, int y)
@@ -87,7 +88,7 @@ Snake::Snake(std::vector<int> brain, int life, int x, int y)
 	size(1) = y;
     hLoc = size / 2;
     dir = UP;
-    createBody(); createBody(); createBody(); createBody();
+    createBody(); createBody();
 }
 
 bool Snake::getDead()
@@ -124,13 +125,13 @@ void Snake::Move()
     lifeTime++;
     life--;
 
-    if (foodCollide(hLoc))
+    if (foodCollide(hLoc) && body.size() < 98)
         eat();
     shiftBody();
     dead = life <= 0 || bodyCollide(hLoc) || wallCollide(hLoc);
 }
 
-void Snake::Draw(std::string* str, int maxScore)
+void Snake::Draw(std::vector<std::string>* src, int maxScore)
 {
     // Define the frame dimensions
     int width = size(0);
@@ -209,7 +210,7 @@ void Snake::Draw(std::string* str, int maxScore)
     }
 
     // Return the drawing
-    *str = scr;
+    src->push_back(scr);
 }
 
 Snake Snake::crossover(Snake& other, double mutationRate, double mutationStrength)
@@ -247,7 +248,7 @@ bool Snake::wallCollide(Eigen::Vector2i pos)
     return (pos(0) >= size(0) - 1) || (pos(0) < 1) || (pos(1) >= size(1) - 1) || (pos(1) < 1);
 }
 
-Eigen::Vector3d Snake::lookInDirection(Eigen::Vector2i _dir)
+Eigen::Vector3d Snake::lookInDirection(Eigen::Vector2i _dir) //optimise this function
 {
     Eigen::Vector2i dir = relative(_dir, this->dir);
     Eigen::Vector3d look = Eigen::Vector3d::Zero();
@@ -296,6 +297,7 @@ void Snake::Think()
 
     static std::array<void(Snake::*)(), 3> moves = { &Snake::moveUp, &Snake::moveRight, &Snake::moveLeft };
     (this->*moves[maxIndex])();
+
 }
 
 void Snake::moveUp()
