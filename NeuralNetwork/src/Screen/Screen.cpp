@@ -47,7 +47,7 @@ void Screen::Show()// it gives some errors (to be fixed)
 			}
 		}
 		setCursorPosition(0, 0);
-		if (1 < source->size())
+		if (5 < source->size())
 			source->erase(source->begin());
 	}
 }

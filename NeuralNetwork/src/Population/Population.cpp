@@ -102,7 +102,7 @@ void Population::processGroup(int startIdx, int endIdx)
         {
             dead_g = dead_g && pop[i].getDead();
             pop[i].Move();
-            if (i == 0)
+            if (i == 0 && !pop[0].getDead())
             {
                 pop[0].Draw(addr, max_popscore);
             }

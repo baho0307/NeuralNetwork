@@ -125,7 +125,7 @@ void Snake::Move()
     lifeTime++;
     life--;
 
-    if (foodCollide(hLoc) && body.size() < 98)
+    if (foodCollide(hLoc) && body.size() < (size(0) - 2) * (size(1) - 2) - 2)
         eat();
     shiftBody();
     dead = life <= 0 || bodyCollide(hLoc) || wallCollide(hLoc);
