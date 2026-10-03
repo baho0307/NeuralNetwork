@@ -2,6 +2,8 @@
 
 #include "../Network/Network.h"
 #include <math.h>
+#include <deque>
+#include <mutex>
 #include "../Food/Food.h"
 
 enum DIR
@@ -22,7 +24,7 @@ private:
 	int score;
 	double fitness;
 	int f_i;
-	std::shared_ptr<Food> food;
+	Food food;
 	Eigen::Vector2i size;
 	Eigen::Vector2i hLoc;
 	std::vector<Eigen::Vector2i> body;
@@ -47,22 +49,27 @@ private:
 	void moveRight();
 
 	void createBody();
-	void eat();
+	void eat(bool replay = 0);
 
 	Eigen::Vector2i relative(Eigen::Vector2i vec, DIR dir);
 public:
 	Snake();
-	Snake(const Snake& other);
-	Snake& operator=(const Snake& other);
+	Snake(const Snake&) = default;
+	Snake& operator=(const Snake&) = default;
+	Snake(Snake&&) = default;
+	Snake& operator=(Snake&&) = default;
 	Snake(Network brain, int life, int x, int y);
 	Snake(std::vector<int> brain, int life, int  x, int y);
+	Snake freshCopy() const;
 
 	bool getDead();
 	double getFitness();
 	int getScore();
+	void Reset();
 
-	void Move();
-	void Draw(std::vector<std::string> *src, int maxScore);
+	bool Move(bool replay = 0);
+	void Draw(std::deque<std::string>* src, int maxScore, std::mutex& mutex);
+	std::deque<std::string> Replay(int maxScore);
 	Snake crossover(Snake& other, double mutationRate, double mutationStrength);
 };
 

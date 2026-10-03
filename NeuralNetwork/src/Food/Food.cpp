@@ -2,7 +2,7 @@
 
 Food::Food()
 {
-	food = (Eigen::Vector2i((int)rnd.getRand(1, max_x - 1), (int)rnd.getRand(1, max_y - 3)));
+	//food = (Eigen::Vector2i((int)rnd.getRand(1, max_x - 1), (int)rnd.getRand(1, max_y - 1)));
 }
 
 Food::Food(int size_x, int size_y)
@@ -10,12 +10,23 @@ Food::Food(int size_x, int size_y)
 	max_x = size_x;
 	max_y = size_y;
 	food = (Eigen::Vector2i((int)rnd.getRand(1, max_x - 1), (int)rnd.getRand(1, max_y - 1)));
+	update_list(food);
 }
 
 void Food::create()
 {
 	food = (Eigen::Vector2i((int)rnd.getRand(1, max_x - 1), (int)rnd.getRand(1, max_y - 1)));// snake size adaptation should be added
+}
 
+void Food::update_list(Eigen::Vector2i food)
+{
+	food_list.push_back(food);
+}
+
+void Food::createFromList()
+{
+	food = *food_list.begin();
+	food_list.pop_front();
 }
 
 //#include "Food.h"

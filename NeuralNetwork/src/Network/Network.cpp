@@ -125,7 +125,7 @@ void Network::calc(VectorXd in)
     VectorXd r = in;
     for (int i = 0; i < weights.size(); i++)
     {
-        r = relu((weights[i] * r) + biases[i]); // Relu or Sigmoid
+        r = sigmoid((weights[i] * r) + biases[i]); // Relu or Sigmoid
     }
     out = r;
 }

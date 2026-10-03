@@ -1,7 +1,7 @@
 #include "Population.h"
 
 
-Population::Population(int count, int lifeTime, std::vector<int> layers, Screen *scr) //create snake population
+Population::Population(int count, int lifeTime, std::vector<int> layers, Screen *scr, std::mutex& mutex) : mutex(mutex) //create snake population
 {
 	std::vector<Snake> newSnakes(count);
 	x = scr->get_x();
@@ -31,12 +31,16 @@ Population::Population(int count, int lifeTime, std::vector<int> layers, Screen 
 void Population::calcGen() //calculate the best snake and replace it to the first indice
 {
 	int maxIndice = 0;
+    replay = false;
 	for (int i = 0; i < pop.size(); i++)
 	{
 		if (pop[i].getFitness() > pop[maxIndice].getFitness())
 			maxIndice = i;
         if (pop[i].getScore() > max_popscore)
+        {
             max_popscore = pop[i].getScore();
+            replay = true;
+        }
         if (pop[i].getScore() == (x - 2) * (y - 2) - 1 && pop.size() > best_pop.size())
             best_pop.push_back(Snake(pop[i]));
 	}
@@ -59,17 +63,16 @@ void Population::createSnakeSubset(int startIdx, int endIdx, std::vector<int> la
 
 void Population::newGeneration() 
 {
-    if (best_pop.size() == pop.size())
-	{
-		pop = best_pop;
-		best_pop.clear();
-		return;
-	}
     calcGen(); // Ensure the best snake is first in the population
 
     // Create a new vector for the new generation of snakes
     std::vector<Snake> newSnakes(pop.size());
-    newSnakes[0] = Snake(pop[0]); // Keep the best snake
+    if (replay)
+    {
+        best_snake = pop[0];
+        best_snake.Reset();
+    }
+    newSnakes[0] = pop[0].freshCopy(); // Keep the best snake
 
     // Define the fixed batch size and calculate the number of groups
     const int batchSize = groupSize;
@@ -104,7 +107,7 @@ void Population::processGroup(int startIdx, int endIdx)
             pop[i].Move();
             if (i == 0 && !pop[0].getDead())
             {
-                pop[0].Draw(addr, max_popscore);
+                pop[0].Draw(addr, max_popscore, mutex);
             }
         }
     } while (!dead_g);
@@ -115,7 +118,7 @@ void Population::Run(bool draw)
 {
 	if (!dead) {
         // Draw the first snake (the best one)
-        pop[0].Draw(addr, max_popscore);
+        //pop[0].Draw(addr, max_popscore);
         dead = pop[0].getDead();
         // Function to process a subset of snakes
 
@@ -147,6 +150,8 @@ void Population::Run(bool draw)
     else {
         // If all snakes are dead, generate a new population
         newGeneration();
+        /*if (replay)
+            scr->UpdateLoopBfr(best_snake.Replay(max_popscore));*/
         dead = false;
     }
 }
